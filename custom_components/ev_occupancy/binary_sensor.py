@@ -22,20 +22,18 @@ async def async_setup_platform(
     discovery_info: dict | None = None,
 ) -> None:
     """Set up EV Occupancy binary sensors from YAML."""
-    data = hass.data[DOMAIN]
-    charger_ids: list[int] = data["charger_ids"]
-    details_coordinator: DetailsCoordinator = data["details_coordinator"]
+    data = hass.data[DOMAIN]["yaml"]
+    async_add_entities(_build_entities(data["charger_ids"], data["details_coordinator"]))
 
-    entities: list[BinarySensorEntity] = []
-    for charger_id in charger_ids:
-        entities.append(
-            EvOccupancyStaleSensor(
-                charger_id=charger_id,
-                coordinator=details_coordinator,
-            )
-        )
 
-    async_add_entities(entities)
+async def async_setup_entry(
+    hass: HomeAssistant,
+    entry,
+    async_add_entities: AddEntitiesCallback,
+) -> None:
+    """Set up EV Occupancy binary sensors from a config entry."""
+    data = hass.data[DOMAIN][entry.entry_id]
+    async_add_entities(_build_entities(data["charger_ids"], data["details_coordinator"]))
 
 
 class EvOccupancyStaleSensor(CoordinatorEntity, BinarySensorEntity):
@@ -78,3 +76,18 @@ class EvOccupancyStaleSensor(CoordinatorEntity, BinarySensorEntity):
         if coordinator.data:
             return coordinator.data.get(self._charger_id)
         return None
+
+
+def _build_entities(
+    charger_ids: list[int],
+    details_coordinator: DetailsCoordinator,
+) -> list[BinarySensorEntity]:
+    entities: list[BinarySensorEntity] = []
+    for charger_id in charger_ids:
+        entities.append(
+            EvOccupancyStaleSensor(
+                charger_id=charger_id,
+                coordinator=details_coordinator,
+            )
+        )
+    return entities

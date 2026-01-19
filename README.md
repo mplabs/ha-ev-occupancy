@@ -56,3 +56,7 @@ Per charger ID:
 - Enable debug logging for `custom_components.ev_occupancy` to inspect responses.
 - If the API schema changes, sensors may show `unknown` while the integration
   logs warnings about missing fields.
+
+## UI Configuration
+Use Settings -> Devices & Services -> Add Integration and search for "EV Occupancy".
+Enter charger IDs as a comma-separated list and optionally provide an API key.

@@ -1,0 +1,39 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "EV Occupancy",
+        "description": "Configure charger IDs and API access.",
+        "data": {
+          "charger_ids": "Charger IDs (comma-separated)",
+          "api_base_url": "API base URL",
+          "api_key": "API key (x-api-key)",
+          "headers_json": "Extra headers (JSON)",
+          "scan_interval_details": "Details poll interval (seconds)",
+          "scan_interval_summary": "Summary poll interval (seconds)",
+          "stale_threshold_minutes": "Stale threshold (minutes)"
+        }
+      }
+    },
+    "error": {
+      "invalid_charger_ids": "Enter one or more charger IDs (comma-separated).",
+      "invalid_headers": "Headers must be valid JSON object."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "EV Occupancy options",
+        "data": {
+          "charger_ids": "Charger IDs (comma-separated)",
+          "api_base_url": "API base URL",
+          "api_key": "API key (x-api-key)",
+          "headers_json": "Extra headers (JSON)",
+          "scan_interval_details": "Details poll interval (seconds)",
+          "scan_interval_summary": "Summary poll interval (seconds)",
+          "stale_threshold_minutes": "Stale threshold (minutes)"
+        }
+      }
+    }
+  }
+}

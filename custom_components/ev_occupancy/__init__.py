@@ -7,6 +7,7 @@ import logging
 
 import voluptuous as vol
 
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
@@ -66,6 +67,46 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
         return True
 
     conf = config[DOMAIN]
+    data = await _async_build_runtime(hass, conf)
+
+    hass.data.setdefault(DOMAIN, {})
+    hass.data[DOMAIN]["yaml"] = data
+
+    for platform in PLATFORMS:
+        await async_load_platform(hass, platform, DOMAIN, {}, config)
+
+    _LOGGER.debug("Set up %s from YAML with %s chargers", DOMAIN, len(data["charger_ids"]))
+    return True
+
+
+async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Set up EV Occupancy from a config entry."""
+    conf = _merge_entry_config(entry)
+    data = await _async_build_runtime(hass, conf)
+
+    hass.data.setdefault(DOMAIN, {})
+    hass.data[DOMAIN][entry.entry_id] = data
+
+    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+
+    _LOGGER.debug(
+        "Set up %s entry %s with %s chargers",
+        DOMAIN,
+        entry.entry_id,
+        len(data["charger_ids"]),
+    )
+    return True
+
+
+async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Unload a config entry."""
+    unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+    if unload_ok:
+        hass.data[DOMAIN].pop(entry.entry_id, None)
+    return unload_ok
+
+
+async def _async_build_runtime(hass: HomeAssistant, conf: dict) -> dict:
     charger_ids = conf[CONF_CHARGER_IDS]
     api_base_url = conf[CONF_API_BASE_URL]
     headers = conf[CONF_HEADERS]
@@ -87,21 +128,30 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
         timedelta(seconds=conf[CONF_SCAN_INTERVAL_SUMMARY]),
     )
 
-    hass.data.setdefault(DOMAIN, {})
-    hass.data[DOMAIN].update(
-        {
-            "config": conf,
-            "charger_ids": charger_ids,
-            "details_coordinator": details_coordinator,
-            "summary_coordinator": summary_coordinator,
-        }
-    )
-
     await details_coordinator.async_refresh()
     await summary_coordinator.async_refresh()
 
-    for platform in PLATFORMS:
-        await async_load_platform(hass, platform, DOMAIN, {}, config)
+    return {
+        "config": conf,
+        "charger_ids": charger_ids,
+        "details_coordinator": details_coordinator,
+        "summary_coordinator": summary_coordinator,
+    }
 
-    _LOGGER.debug("Set up %s with %s chargers", DOMAIN, len(charger_ids))
-    return True
+
+def _merge_entry_config(entry: ConfigEntry) -> dict:
+    merged = {**entry.data, **entry.options}
+    return {
+        CONF_CHARGER_IDS: merged.get(CONF_CHARGER_IDS, []),
+        CONF_API_BASE_URL: merged.get(CONF_API_BASE_URL, DEFAULT_API_BASE_URL),
+        CONF_HEADERS: merged.get(CONF_HEADERS, {}),
+        CONF_SCAN_INTERVAL_DETAILS: merged.get(
+            CONF_SCAN_INTERVAL_DETAILS, DEFAULT_SCAN_INTERVAL_DETAILS
+        ),
+        CONF_SCAN_INTERVAL_SUMMARY: merged.get(
+            CONF_SCAN_INTERVAL_SUMMARY, DEFAULT_SCAN_INTERVAL_SUMMARY
+        ),
+        CONF_STALE_THRESHOLD_MINUTES: merged.get(
+            CONF_STALE_THRESHOLD_MINUTES, DEFAULT_STALE_THRESHOLD_MINUTES
+        ),
+    }

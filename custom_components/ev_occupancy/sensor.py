@@ -99,33 +99,30 @@ async def async_setup_platform(
     discovery_info: dict | None = None,
 ) -> None:
     """Set up EV Occupancy sensors from YAML."""
-    data = hass.data[DOMAIN]
-    charger_ids: list[int] = data["charger_ids"]
-    details_coordinator: DetailsCoordinator = data["details_coordinator"]
-    summary_coordinator: SummaryCoordinator = data["summary_coordinator"]
+    data = hass.data[DOMAIN]["yaml"]
+    async_add_entities(
+        _build_entities(
+            data["charger_ids"],
+            data["details_coordinator"],
+            data["summary_coordinator"],
+        )
+    )
 
-    entities: list[SensorEntity] = []
-    for charger_id in charger_ids:
-        for description in DETAILS_SENSORS:
-            entities.append(
-                EvOccupancySensor(
-                    charger_id=charger_id,
-                    description=description,
-                    coordinator=details_coordinator,
-                    details_coordinator=details_coordinator,
-                )
-            )
-        for description in SUMMARY_SENSORS:
-            entities.append(
-                EvOccupancySensor(
-                    charger_id=charger_id,
-                    description=description,
-                    coordinator=summary_coordinator,
-                    details_coordinator=details_coordinator,
-                )
-            )
 
-    async_add_entities(entities)
+async def async_setup_entry(
+    hass: HomeAssistant,
+    entry,
+    async_add_entities: AddEntitiesCallback,
+) -> None:
+    """Set up EV Occupancy sensors from a config entry."""
+    data = hass.data[DOMAIN][entry.entry_id]
+    async_add_entities(
+        _build_entities(
+            data["charger_ids"],
+            data["details_coordinator"],
+            data["summary_coordinator"],
+        )
+    )
 
 
 class EvOccupancySensor(CoordinatorEntity, SensorEntity):
@@ -235,3 +232,31 @@ def _details_attributes(details: DetailsData) -> dict[str, Any]:
         "source": details.source,
         "evse_statuses": details.evse_statuses,
     }
+
+
+def _build_entities(
+    charger_ids: list[int],
+    details_coordinator: DetailsCoordinator,
+    summary_coordinator: SummaryCoordinator,
+) -> list[SensorEntity]:
+    entities: list[SensorEntity] = []
+    for charger_id in charger_ids:
+        for description in DETAILS_SENSORS:
+            entities.append(
+                EvOccupancySensor(
+                    charger_id=charger_id,
+                    description=description,
+                    coordinator=details_coordinator,
+                    details_coordinator=details_coordinator,
+                )
+            )
+        for description in SUMMARY_SENSORS:
+            entities.append(
+                EvOccupancySensor(
+                    charger_id=charger_id,
+                    description=description,
+                    coordinator=summary_coordinator,
+                    details_coordinator=details_coordinator,
+                )
+            )
+    return entities

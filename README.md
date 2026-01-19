@@ -15,6 +15,7 @@ charging session activity using ABRP/Iternio endpoints.
 2. Restart Home Assistant.
 
 ## Configuration (YAML)
+See `configuration.yaml.example` for a full snippet.
 ```yaml
 ev_occupancy:
   charger_ids:

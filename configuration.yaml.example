@@ -1,0 +1,9 @@
+ev_occupancy:
+  charger_ids:
+    - 123456
+  api_base_url: https://api.iternio.com
+  headers:
+    x-api-key: !secret iternio_api_key
+  scan_interval_details: 120
+  scan_interval_summary: 3600
+  stale_threshold_minutes: 15

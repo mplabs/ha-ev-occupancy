@@ -1,7 +1,7 @@
 {
   "domain": "ev_occupancy",
   "name": "EV Occupancy",
-  "documentation": "https://example.com/ev-occupancy",
+  "documentation": "https://github.com/mplabs/home-automation/tree/main/ev-occupancy",
   "version": "0.1.0",
   "iot_class": "cloud_polling",
   "config_flow": false,

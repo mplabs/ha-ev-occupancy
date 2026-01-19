@@ -8,7 +8,11 @@ from typing import Any
 import voluptuous as vol
 
 from homeassistant import config_entries
-from homeassistant.helpers.selector import TextSelector, TextSelectorConfig
+from homeassistant.helpers.selector import (
+    TextSelector,
+    TextSelectorConfig,
+    TextSelectorType,
+)
 
 from .const import (
     CONF_API_BASE_URL,
@@ -87,12 +91,12 @@ def _build_schema(defaults: dict[str, Any]) -> vol.Schema:
                 default=defaults[CONF_API_BASE_URL],
             ): str,
             vol.Optional(CONF_API_KEY, default=defaults[CONF_API_KEY]): TextSelector(
-                TextSelectorConfig(type="password")
+                TextSelectorConfig(type=TextSelectorType.PASSWORD)
             ),
             vol.Optional(
                 CONF_HEADERS_JSON,
                 default=defaults[CONF_HEADERS_JSON],
-            ): TextSelector(TextSelectorConfig(multiline=True)),
+            ): TextSelector(TextSelectorConfig(multiline=True, type=TextSelectorType.TEXT)),
             vol.Optional(
                 CONF_SCAN_INTERVAL_DETAILS,
                 default=defaults[CONF_SCAN_INTERVAL_DETAILS],

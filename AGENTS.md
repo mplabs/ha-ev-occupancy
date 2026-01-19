@@ -33,3 +33,4 @@
 - 2025-09-06: Initialized repo; captured implementation plan.
 - 2025-09-06: Added custom component scaffold (manifest, constants, init).
 - 2025-09-06: Implemented YAML setup, API client, coordinators, and entities.
+- 2025-09-06: Added README with configuration and usage notes.

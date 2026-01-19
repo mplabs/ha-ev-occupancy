@@ -38,7 +38,7 @@ CONFIG_SCHEMA = vol.Schema(
         DOMAIN: vol.Schema(
             {
                 vol.Required(CONF_CHARGER_IDS): vol.All(
-                    cv.ensure_list, [vol.Coerce(int)], vol.Length(min=1)
+                    cv.ensure_list, [vol.Coerce(str)], vol.Length(min=1)
                 ),
                 vol.Optional(CONF_API_BASE_URL, default=DEFAULT_API_BASE_URL): cv.url,
                 vol.Optional(CONF_HEADERS, default={}): vol.Schema(
@@ -107,7 +107,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 
 async def _async_build_runtime(hass: HomeAssistant, conf: dict) -> dict:
-    charger_ids = conf[CONF_CHARGER_IDS]
+    charger_ids = [str(item).strip() for item in conf[CONF_CHARGER_IDS] if str(item).strip()]
     api_base_url = conf[CONF_API_BASE_URL]
     headers = conf[CONF_HEADERS]
 
@@ -142,7 +142,11 @@ async def _async_build_runtime(hass: HomeAssistant, conf: dict) -> dict:
 def _merge_entry_config(entry: ConfigEntry) -> dict:
     merged = {**entry.data, **entry.options}
     return {
-        CONF_CHARGER_IDS: merged.get(CONF_CHARGER_IDS, []),
+        CONF_CHARGER_IDS: [
+            str(item).strip()
+            for item in merged.get(CONF_CHARGER_IDS, [])
+            if str(item).strip()
+        ],
         CONF_API_BASE_URL: merged.get(CONF_API_BASE_URL, DEFAULT_API_BASE_URL),
         CONF_HEADERS: merged.get(CONF_HEADERS, {}),
         CONF_SCAN_INTERVAL_DETAILS: merged.get(

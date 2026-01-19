@@ -42,7 +42,7 @@ class EvOccupancyStaleSensor(CoordinatorEntity, BinarySensorEntity):
     def __init__(
         self,
         *,
-        charger_id: int,
+        charger_id: str,
         coordinator: DetailsCoordinator,
     ) -> None:
         super().__init__(coordinator)
@@ -79,7 +79,7 @@ class EvOccupancyStaleSensor(CoordinatorEntity, BinarySensorEntity):
 
 
 def _build_entities(
-    charger_ids: list[int],
+    charger_ids: list[str],
     details_coordinator: DetailsCoordinator,
 ) -> list[BinarySensorEntity]:
     entities: list[BinarySensorEntity] = []

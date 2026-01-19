@@ -29,7 +29,7 @@ class EvOccupancyApiClient:
         self._headers = headers or {}
         self._timeout = aiohttp.ClientTimeout(total=timeout)
 
-    async def fetch_details(self, charger_ids: list[int]) -> Any:
+    async def fetch_details(self, charger_ids: list[str]) -> Any:
         """Fetch charger details for multiple charger IDs."""
         payload = {"chargerIds": charger_ids}
         return await self._request(
@@ -38,7 +38,7 @@ class EvOccupancyApiClient:
             json=payload,
         )
 
-    async def fetch_session_summary(self, charger_id: int) -> Any:
+    async def fetch_session_summary(self, charger_id: str) -> Any:
         """Fetch session summary for a single charger."""
         return await self._request(
             "GET",

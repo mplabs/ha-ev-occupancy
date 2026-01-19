@@ -1,0 +1,9 @@
+{
+  "domain": "ev_occupancy",
+  "name": "EV Occupancy",
+  "documentation": "https://example.com/ev-occupancy",
+  "version": "0.1.0",
+  "iot_class": "cloud_polling",
+  "config_flow": false,
+  "requirements": []
+}

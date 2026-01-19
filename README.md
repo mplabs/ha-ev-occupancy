@@ -14,6 +14,9 @@ charging session activity using ABRP/Iternio endpoints.
    directory.
 2. Restart Home Assistant.
 
+### HACS
+Add this repository as a custom integration and install it from HACS.
+
 ## Configuration (YAML)
 See `configuration.yaml.example` for a full snippet.
 ```yaml

@@ -1,0 +1,5 @@
+{
+  "name": "EV Occupancy",
+  "content": "custom_components/ev_occupancy",
+  "render_readme": true
+}

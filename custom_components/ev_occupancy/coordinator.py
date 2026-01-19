@@ -250,7 +250,7 @@ def _parse_details_payload(
                 charger_id=charger_id,
                 name=_get_str(charger, "name", "chargerName"),
                 address=_get_str(charger, "address"),
-                network_name=_get_str(charger, "networkName", "network"),
+                network_name=_get_network_name(charger),
                 lat=_get_lat(charger),
                 lon=_get_lon(charger),
                 has_dynamic_status=_get_bool(charger, "hasDynamicStatus"),
@@ -312,7 +312,7 @@ def _parse_details_payload(
             charger_id=charger_id,
             name=_get_str(charger, "name", "chargerName"),
             address=_get_str(charger, "address"),
-            network_name=_get_str(charger, "networkName", "network"),
+            network_name=_get_network_name(charger),
             lat=_get_lat(charger),
             lon=_get_lon(charger),
             has_dynamic_status=_get_bool(charger, "hasDynamicStatus"),
@@ -403,10 +403,26 @@ def _extract_chargers(payload: Any) -> list[dict[str, Any]]:
         return [item for item in payload if isinstance(item, dict)]
     if not isinstance(payload, dict):
         return []
+    items = payload.get("items")
+    if isinstance(items, list):
+        chargers: list[dict[str, Any]] = []
+        for entry in items:
+            if not isinstance(entry, dict):
+                continue
+            item = entry.get("item")
+            if isinstance(item, dict):
+                chargers.append(item)
+            else:
+                chargers.append(entry)
+        if chargers:
+            return chargers
     for key in ("chargers", "chargerDetails", "chargerDetail", "data", "result"):
         value = payload.get(key)
         if isinstance(value, list):
             return [item for item in value if isinstance(item, dict)]
+    item = payload.get("item")
+    if isinstance(item, dict):
+        return [item]
     charger = payload.get("charger")
     if isinstance(charger, dict):
         return [charger]
@@ -462,6 +478,15 @@ def _get_bool(charger: dict[str, Any], key: str) -> bool | None:
     return None
 
 
+def _get_network_name(charger: dict[str, Any]) -> str | None:
+    network = charger.get("network")
+    if isinstance(network, dict):
+        name = network.get("name")
+        if isinstance(name, str) and name.strip():
+            return name.strip()
+    return _get_str(charger, "networkName", "network")
+
+
 def _get_lat(charger: dict[str, Any]) -> float | None:
     for key in ("lat", "latitude"):
         value = charger.get(key)
@@ -473,18 +498,30 @@ def _get_lat(charger: dict[str, Any]) -> float | None:
             value = position.get(key)
             if isinstance(value, (int, float)):
                 return float(value)
+    coordinates = charger.get("coordinates")
+    if isinstance(coordinates, dict):
+        for key in ("lat", "latitude"):
+            value = coordinates.get(key)
+            if isinstance(value, (int, float)):
+                return float(value)
     return None
 
 
 def _get_lon(charger: dict[str, Any]) -> float | None:
-    for key in ("lon", "lng", "longitude"):
+    for key in ("lon", "lng", "longitude", "long"):
         value = charger.get(key)
         if isinstance(value, (int, float)):
             return float(value)
     position = charger.get("position")
     if isinstance(position, dict):
-        for key in ("lon", "lng", "longitude"):
+        for key in ("lon", "lng", "longitude", "long"):
             value = position.get(key)
+            if isinstance(value, (int, float)):
+                return float(value)
+    coordinates = charger.get("coordinates")
+    if isinstance(coordinates, dict):
+        for key in ("lon", "lng", "longitude", "long"):
+            value = coordinates.get(key)
             if isinstance(value, (int, float)):
                 return float(value)
     return None

@@ -10,8 +10,7 @@
           "api_key": "API key (x-api-key)",
           "headers_json": "Extra headers (JSON)",
           "scan_interval_details": "Details poll interval (seconds)",
-          "scan_interval_summary": "Summary poll interval (seconds)",
-          "stale_threshold_minutes": "Stale threshold (minutes)"
+          "scan_interval_summary": "Summary poll interval (seconds)"
         }
       }
     },
@@ -30,8 +29,7 @@
           "api_key": "API key (x-api-key)",
           "headers_json": "Extra headers (JSON)",
           "scan_interval_details": "Details poll interval (seconds)",
-          "scan_interval_summary": "Summary poll interval (seconds)",
-          "stale_threshold_minutes": "Stale threshold (minutes)"
+          "scan_interval_summary": "Summary poll interval (seconds)"
         }
       }
     }

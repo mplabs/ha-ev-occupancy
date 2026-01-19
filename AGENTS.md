@@ -39,3 +39,4 @@
 - 2025-09-06: Added config flow and entry-based setup for UI configuration.
 - 2025-09-06: Hardened config flow selectors for HA UI fields.
 - 2025-09-06: Handled "items.item" payloads and nested network/coordinates in details parsing.
+- 2025-09-06: Removed staleness tracking and binary sensor; rely on status as reported.

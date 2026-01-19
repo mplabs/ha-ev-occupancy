@@ -20,18 +20,16 @@ from .const import (
     CONF_HEADERS,
     CONF_SCAN_INTERVAL_DETAILS,
     CONF_SCAN_INTERVAL_SUMMARY,
-    CONF_STALE_THRESHOLD_MINUTES,
     DEFAULT_API_BASE_URL,
     DEFAULT_SCAN_INTERVAL_DETAILS,
     DEFAULT_SCAN_INTERVAL_SUMMARY,
-    DEFAULT_STALE_THRESHOLD_MINUTES,
     DOMAIN,
 )
 from .coordinator import DetailsCoordinator, SummaryCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
-PLATFORMS = ["sensor", "binary_sensor"]
+PLATFORMS = ["sensor"]
 
 CONFIG_SCHEMA = vol.Schema(
     {
@@ -50,11 +48,8 @@ CONFIG_SCHEMA = vol.Schema(
                 vol.Optional(
                     CONF_SCAN_INTERVAL_SUMMARY, default=DEFAULT_SCAN_INTERVAL_SUMMARY
                 ): cv.positive_int,
-                vol.Optional(
-                    CONF_STALE_THRESHOLD_MINUTES,
-                    default=DEFAULT_STALE_THRESHOLD_MINUTES,
-                ): cv.positive_int,
-            }
+            },
+            extra=vol.ALLOW_EXTRA,
         )
     },
     extra=vol.ALLOW_EXTRA,
@@ -118,7 +113,6 @@ async def _async_build_runtime(hass: HomeAssistant, conf: dict) -> dict:
         hass,
         api,
         charger_ids,
-        conf[CONF_STALE_THRESHOLD_MINUTES],
         timedelta(seconds=conf[CONF_SCAN_INTERVAL_DETAILS]),
     )
     summary_coordinator = SummaryCoordinator(
@@ -150,8 +144,5 @@ def _merge_entry_config(entry: ConfigEntry) -> dict:
         ),
         CONF_SCAN_INTERVAL_SUMMARY: merged.get(
             CONF_SCAN_INTERVAL_SUMMARY, DEFAULT_SCAN_INTERVAL_SUMMARY
-        ),
-        CONF_STALE_THRESHOLD_MINUTES: merged.get(
-            CONF_STALE_THRESHOLD_MINUTES, DEFAULT_STALE_THRESHOLD_MINUTES
         ),
     }

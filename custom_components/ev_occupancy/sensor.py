@@ -11,7 +11,6 @@ from homeassistant.components.sensor import (
     SensorEntityDescription,
     SensorStateClass,
 )
-from homeassistant.const import UnitOfTime
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -54,14 +53,6 @@ DETAILS_SENSORS: tuple[EvOccupancySensorDescription, ...] = (
         key="total",
         name="Total",
         icon="mdi:counter",
-        state_class=SensorStateClass.MEASUREMENT,
-        source="details",
-    ),
-    EvOccupancySensorDescription(
-        key="freshness_minutes",
-        name="Freshness Minutes",
-        icon="mdi:timer-sand",
-        native_unit_of_measurement=UnitOfTime.MINUTES,
         state_class=SensorStateClass.MEASUREMENT,
         source="details",
     ),
@@ -160,8 +151,6 @@ class EvOccupancySensor(CoordinatorEntity, SensorEntity):
                 return details.unknown_evses
             if self.entity_description.key == "total":
                 return details.total_evses
-            if self.entity_description.key == "freshness_minutes":
-                return details.freshness_minutes
         else:
             summary = self._summary_data
             if summary is None:

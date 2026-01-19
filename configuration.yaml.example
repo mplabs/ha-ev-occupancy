@@ -6,4 +6,3 @@ ev_occupancy:
     x-api-key: !secret iternio_api_key
   scan_interval_details: 120
   scan_interval_summary: 3600
-  stale_threshold_minutes: 15

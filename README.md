@@ -5,7 +5,6 @@ charging session activity using ABRP/Iternio endpoints.
 
 ## Features
 - Near-real-time occupancy counts (available, occupied, unknown, total)
-- Data freshness tracking with a stale binary sensor
 - Session counts for the last 7 and 30 days plus last session end time
 - Optional peak-hour/weekday attributes on session sensors
 
@@ -29,7 +28,6 @@ ev_occupancy:
     x-api-key: !secret iternio_api_key
   scan_interval_details: 120
   scan_interval_summary: 3600
-  stale_threshold_minutes: 15
 ```
 
 ### Options
@@ -38,13 +36,11 @@ ev_occupancy:
 - `headers` (optional): Request headers such as `x-api-key`.
 - `scan_interval_details` (optional): Seconds between detail polls.
 - `scan_interval_summary` (optional): Seconds between summary polls.
-- `stale_threshold_minutes` (optional): Minutes before data is treated as stale.
 
 ## Entities
 Per charger ID:
-- Sensors: available, occupied, unknown, total, freshness minutes
+- Sensors: available, occupied, unknown, total
 - Session sensors: sessions 7d, sessions 30d, last session end
-- Binary sensor: data stale
 
 ## Notes
 - Stale EVSEs are counted as unknown.

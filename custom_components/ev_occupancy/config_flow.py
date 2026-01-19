@@ -22,11 +22,9 @@ from .const import (
     CONF_HEADERS_JSON,
     CONF_SCAN_INTERVAL_DETAILS,
     CONF_SCAN_INTERVAL_SUMMARY,
-    CONF_STALE_THRESHOLD_MINUTES,
     DEFAULT_API_BASE_URL,
     DEFAULT_SCAN_INTERVAL_DETAILS,
     DEFAULT_SCAN_INTERVAL_SUMMARY,
-    DEFAULT_STALE_THRESHOLD_MINUTES,
     DOMAIN,
 )
 
@@ -105,10 +103,6 @@ def _build_schema(defaults: dict[str, Any]) -> vol.Schema:
                 CONF_SCAN_INTERVAL_SUMMARY,
                 default=defaults[CONF_SCAN_INTERVAL_SUMMARY],
             ): int,
-            vol.Optional(
-                CONF_STALE_THRESHOLD_MINUTES,
-                default=defaults[CONF_STALE_THRESHOLD_MINUTES],
-            ): int,
         }
     )
 
@@ -160,11 +154,6 @@ def _validate_user_input(user_input: dict[str, Any]) -> tuple[dict[str, Any], di
         CONF_SCAN_INTERVAL_SUMMARY: int(
             user_input.get(CONF_SCAN_INTERVAL_SUMMARY, DEFAULT_SCAN_INTERVAL_SUMMARY)
         ),
-        CONF_STALE_THRESHOLD_MINUTES: int(
-            user_input.get(
-                CONF_STALE_THRESHOLD_MINUTES, DEFAULT_STALE_THRESHOLD_MINUTES
-            )
-        ),
     }
 
     return data, errors
@@ -192,9 +181,6 @@ def _defaults_from_entry(
         CONF_SCAN_INTERVAL_SUMMARY: merged.get(
             CONF_SCAN_INTERVAL_SUMMARY, DEFAULT_SCAN_INTERVAL_SUMMARY
         ),
-        CONF_STALE_THRESHOLD_MINUTES: merged.get(
-            CONF_STALE_THRESHOLD_MINUTES, DEFAULT_STALE_THRESHOLD_MINUTES
-        ),
     }
 
 
@@ -212,10 +198,5 @@ def _defaults_from_input(user_input: dict[str, Any] | None) -> dict[str, Any]:
         ),
         CONF_SCAN_INTERVAL_SUMMARY: int(
             user_input.get(CONF_SCAN_INTERVAL_SUMMARY, DEFAULT_SCAN_INTERVAL_SUMMARY)
-        ),
-        CONF_STALE_THRESHOLD_MINUTES: int(
-            user_input.get(
-                CONF_STALE_THRESHOLD_MINUTES, DEFAULT_STALE_THRESHOLD_MINUTES
-            )
         ),
     }

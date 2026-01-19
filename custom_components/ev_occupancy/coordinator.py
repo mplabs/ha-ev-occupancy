@@ -42,8 +42,6 @@ class DetailsData:
     occupied_evses: int | None
     unknown_evses: int | None
     last_status_update: datetime | None
-    freshness_minutes: int | None
-    data_stale: bool | None
     evse_statuses: list[dict[str, Any]]
 
 
@@ -111,13 +109,11 @@ class DetailsCoordinator(BaseCoordinator):
         hass: HomeAssistant,
         api: EvOccupancyApiClient,
         charger_ids: list[int],
-        stale_threshold_minutes: int,
         update_interval: timedelta,
     ) -> None:
         super().__init__(hass, name="ev_occupancy_details", base_interval=update_interval)
         self._api = api
         self._charger_ids = charger_ids
-        self._stale_threshold = timedelta(minutes=stale_threshold_minutes)
 
     async def _async_fetch_data(self) -> dict[int, DetailsData]:
         try:
@@ -125,11 +121,7 @@ class DetailsCoordinator(BaseCoordinator):
         except EvOccupancyApiError as err:
             raise UpdateFailed(str(err)) from err
 
-        results = _parse_details_payload(
-            payload,
-            self._charger_ids,
-            self._stale_threshold,
-        )
+        results = _parse_details_payload(payload, self._charger_ids)
 
         if not results:
             raise UpdateFailed("No charger details returned")
@@ -205,9 +197,7 @@ class SummaryCoordinator(BaseCoordinator):
 def _parse_details_payload(
     payload: Any,
     charger_ids: list[int],
-    stale_threshold: timedelta,
 ) -> dict[int, DetailsData]:
-    now = dt_util.utcnow()
     chargers = _extract_chargers(payload)
     by_id: dict[int, dict[str, Any]] = {}
 
@@ -237,8 +227,6 @@ def _parse_details_payload(
                 occupied_evses=None,
                 unknown_evses=None,
                 last_status_update=None,
-                freshness_minutes=None,
-                data_stale=True,
                 evse_statuses=[],
             )
             continue
@@ -260,8 +248,6 @@ def _parse_details_payload(
                 occupied_evses=None,
                 unknown_evses=None,
                 last_status_update=None,
-                freshness_minutes=None,
-                data_stale=True,
                 evse_statuses=[],
             )
             continue
@@ -280,10 +266,7 @@ def _parse_details_payload(
                 if last_update is None or last_updated > last_update:
                     last_update = last_updated
 
-            stale = _is_stale(last_updated, now, stale_threshold)
-            if stale:
-                unknown += 1
-            elif status in AVAILABLE_STATUSES:
+            if status in AVAILABLE_STATUSES:
                 available += 1
             elif status in OCCUPIED_STATUSES:
                 occupied += 1
@@ -298,16 +281,10 @@ def _parse_details_payload(
                         "last_updated": dt_util.as_local(last_updated).isoformat()
                         if last_updated
                         else None,
-                        "stale": stale,
                     }
                 )
 
         total = len(evses)
-        freshness_minutes = (
-            int((now - last_update).total_seconds() / 60) if last_update else None
-        )
-        data_stale = _is_stale(last_update, now, stale_threshold)
-
         results[charger_id] = DetailsData(
             charger_id=charger_id,
             name=_get_str(charger, "name", "chargerName"),
@@ -322,8 +299,6 @@ def _parse_details_payload(
             occupied_evses=occupied,
             unknown_evses=unknown,
             last_status_update=last_update,
-            freshness_minutes=freshness_minutes,
-            data_stale=data_stale,
             evse_statuses=evse_statuses,
         )
 
@@ -451,16 +426,6 @@ def _parse_datetime(value: Any) -> datetime | None:
             return dt_util.assume_utc(parsed)
         return parsed
     return None
-
-
-def _is_stale(
-    last_updated: datetime | None,
-    now: datetime,
-    threshold: timedelta,
-) -> bool:
-    if last_updated is None:
-        return True
-    return now - last_updated > threshold
 
 
 def _get_str(charger: dict[str, Any], *keys: str) -> str | None:

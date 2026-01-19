@@ -38,4 +38,3 @@
 - 2025-09-06: Added HACS metadata and updated documentation/issue tracker URLs.
 - 2025-09-06: Added config flow and entry-based setup for UI configuration.
 - 2025-09-06: Hardened config flow selectors for HA UI fields.
-- 2025-09-06: Added support for alphanumeric charger IDs in YAML and UI config.

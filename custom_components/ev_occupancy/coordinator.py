@@ -29,7 +29,7 @@ MAX_EVSE_STATUSES = 5
 class DetailsData:
     """Parsed charger details data."""
 
-    charger_id: str
+    charger_id: int
     name: str | None
     address: str | None
     network_name: str | None
@@ -51,7 +51,7 @@ class DetailsData:
 class SummaryData:
     """Parsed session summary data."""
 
-    charger_id: str
+    charger_id: int
     sessions_today: int | None
     sessions_7d: int | None
     sessions_30d: int | None
@@ -60,7 +60,7 @@ class SummaryData:
     peak_weekday_30d: int | None
 
 
-class BaseCoordinator(DataUpdateCoordinator[dict[str, Any]]):
+class BaseCoordinator(DataUpdateCoordinator[dict[int, Any]]):
     """Shared coordinator logic with jitter and backoff."""
 
     def __init__(
@@ -110,7 +110,7 @@ class DetailsCoordinator(BaseCoordinator):
         self,
         hass: HomeAssistant,
         api: EvOccupancyApiClient,
-        charger_ids: list[str],
+        charger_ids: list[int],
         stale_threshold_minutes: int,
         update_interval: timedelta,
     ) -> None:
@@ -119,7 +119,7 @@ class DetailsCoordinator(BaseCoordinator):
         self._charger_ids = charger_ids
         self._stale_threshold = timedelta(minutes=stale_threshold_minutes)
 
-    async def _async_fetch_data(self) -> dict[str, DetailsData]:
+    async def _async_fetch_data(self) -> dict[int, DetailsData]:
         try:
             payload = await self._api.fetch_details(self._charger_ids)
         except EvOccupancyApiError as err:
@@ -138,7 +138,7 @@ class DetailsCoordinator(BaseCoordinator):
             results = {**self.data, **results}
         return results
 
-    async def _async_update_data(self) -> dict[str, DetailsData]:  # type: ignore[override]
+    async def _async_update_data(self) -> dict[int, DetailsData]:  # type: ignore[override]
         return await self._async_update_with_backoff()
 
 
@@ -149,18 +149,18 @@ class SummaryCoordinator(BaseCoordinator):
         self,
         hass: HomeAssistant,
         api: EvOccupancyApiClient,
-        charger_ids: list[str],
+        charger_ids: list[int],
         update_interval: timedelta,
     ) -> None:
         super().__init__(hass, name="ev_occupancy_summary", base_interval=update_interval)
         self._api = api
         self._charger_ids = charger_ids
 
-    async def _async_fetch_data(self) -> dict[str, SummaryData]:
-        successes: dict[str, SummaryData] = {}
-        failures: list[str] = []
+    async def _async_fetch_data(self) -> dict[int, SummaryData]:
+        successes: dict[int, SummaryData] = {}
+        failures: list[int] = []
 
-        async def _fetch_one(charger_id: str) -> tuple[str, SummaryData | None]:
+        async def _fetch_one(charger_id: int) -> tuple[int, SummaryData | None]:
             try:
                 payload = await self._api.fetch_session_summary(charger_id)
             except EvOccupancyApiError as err:
@@ -198,26 +198,26 @@ class SummaryCoordinator(BaseCoordinator):
 
         return successes
 
-    async def _async_update_data(self) -> dict[str, SummaryData]:  # type: ignore[override]
+    async def _async_update_data(self) -> dict[int, SummaryData]:  # type: ignore[override]
         return await self._async_update_with_backoff()
 
 
 def _parse_details_payload(
     payload: Any,
-    charger_ids: list[str],
+    charger_ids: list[int],
     stale_threshold: timedelta,
-) -> dict[str, DetailsData]:
+) -> dict[int, DetailsData]:
     now = dt_util.utcnow()
     chargers = _extract_chargers(payload)
-    by_id: dict[str, dict[str, Any]] = {}
+    by_id: dict[int, dict[str, Any]] = {}
 
     for charger in chargers:
-        charger_id = _coerce_id(charger.get("id") or charger.get("chargerId"))
+        charger_id = _coerce_int(charger.get("id") or charger.get("chargerId"))
         if charger_id is None:
             continue
         by_id[charger_id] = charger
 
-    results: dict[str, DetailsData] = {}
+    results: dict[int, DetailsData] = {}
 
     for charger_id in charger_ids:
         charger = by_id.get(charger_id)
@@ -330,7 +330,7 @@ def _parse_details_payload(
     return results
 
 
-def _parse_summary_payload(payload: Any, charger_id: str) -> SummaryData | None:
+def _parse_summary_payload(payload: Any, charger_id: int) -> SummaryData | None:
     telemetry = payload.get("chargerTelemetry") if isinstance(payload, dict) else None
     if not isinstance(telemetry, dict):
         _LOGGER.warning("Summary payload missing chargerTelemetry for %s", charger_id)
@@ -490,13 +490,11 @@ def _get_lon(charger: dict[str, Any]) -> float | None:
     return None
 
 
-def _coerce_id(value: Any) -> str | None:
-    if isinstance(value, (int, float)):
-        return str(int(value))
-    if isinstance(value, str):
-        value = value.strip()
-        if value:
-            return value
+def _coerce_int(value: Any) -> int | None:
+    if isinstance(value, int):
+        return value
+    if isinstance(value, str) and value.isdigit():
+        return int(value)
     return None
 
 

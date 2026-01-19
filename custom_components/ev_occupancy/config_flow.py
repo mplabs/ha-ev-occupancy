@@ -117,12 +117,15 @@ def _validate_user_input(user_input: dict[str, Any]) -> tuple[dict[str, Any], di
     errors: dict[str, str] = {}
 
     charger_ids_raw = str(user_input.get(CONF_CHARGER_IDS, "")).strip()
-    charger_ids: list[str] = []
+    charger_ids: list[int] = []
     for token in charger_ids_raw.split(","):
         token = token.strip()
         if not token:
             continue
-        charger_ids.append(token)
+        if not token.isdigit():
+            errors[CONF_CHARGER_IDS] = "invalid_charger_ids"
+            break
+        charger_ids.append(int(token))
 
     if not charger_ids and CONF_CHARGER_IDS not in errors:
         errors[CONF_CHARGER_IDS] = "invalid_charger_ids"

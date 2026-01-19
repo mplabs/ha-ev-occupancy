@@ -22,7 +22,7 @@ See `configuration.yaml.example` for a full snippet.
 ```yaml
 ev_occupancy:
   charger_ids:
-    - DEJENE005801
+    - 123456
     - 789012
   api_base_url: https://api.iternio.com
   headers:
@@ -33,7 +33,7 @@ ev_occupancy:
 ```
 
 ### Options
-- `charger_ids` (required): List of charger IDs (numeric or alphanumeric).
+- `charger_ids` (required): List of charger IDs.
 - `api_base_url` (optional): Base URL for the API.
 - `headers` (optional): Request headers such as `x-api-key`.
 - `scan_interval_details` (optional): Seconds between detail polls.

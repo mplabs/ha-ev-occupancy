@@ -133,7 +133,7 @@ class EvOccupancySensor(CoordinatorEntity, SensorEntity):
     def __init__(
         self,
         *,
-        charger_id: str,
+        charger_id: int,
         description: EvOccupancySensorDescription,
         coordinator: DetailsCoordinator | SummaryCoordinator,
         details_coordinator: DetailsCoordinator,
@@ -235,7 +235,7 @@ def _details_attributes(details: DetailsData) -> dict[str, Any]:
 
 
 def _build_entities(
-    charger_ids: list[str],
+    charger_ids: list[int],
     details_coordinator: DetailsCoordinator,
     summary_coordinator: SummaryCoordinator,
 ) -> list[SensorEntity]:

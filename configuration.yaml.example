@@ -1,6 +1,6 @@
 ev_occupancy:
   charger_ids:
-    - DEJENE005801
+    - 123456
   api_base_url: https://api.iternio.com
   headers:
     x-api-key: !secret iternio_api_key
